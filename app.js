@@ -11,6 +11,7 @@ const cartContent = document.querySelector(".cart-content");
 const productsDOM = document.querySelector(".products-center");
 
 let cart = [];
+let buttonsDOM = [];
 
 //getting the products
 class Products {
@@ -22,7 +23,8 @@ class Products {
       let products = data.items;
       products = products.map(item => {
         const { title, price } = item.fields;
-        const { id } = item.sys;
+        const id = item.sys;
+        console.log(id);
         const image = item.fields.image.fields.file.url;
         return { title, price, id, image };
       });
@@ -33,9 +35,72 @@ class Products {
   }
 }
 //display products
-class UI {}
+class UI {
+  displayProducts(products) {
+    let result = "";
+    products.forEach(product => {
+      result += `
+      <!-- single product -->
+      <article class="product">
+        <div class="img-container">
+          <img
+            src=${product.image}
+            alt="product"
+            class="product-img"
+          />
+          <button class="bag-btn" data-id=${product.id}>
+            <i class="fas fa-shopping-cart"></i>
+            add to bag
+          </button>
+        </div>
+        <h3>${product.title}</h3>
+        <h4>$${product.price}</h4>
+      </article>
+      <!-- end of single product -->
+      `;
+    });
+    productsDOM.innerHTML = `${result}`;
+  }
+  getButtons() {
+    let buttons = [...productsDOM.querySelectorAll(".bag-btn")];
+    console.log(buttons);
+    // buttonsDOM = bottons;
+    buttons.forEach(button => {
+      let id = button.dataset.id;
+      // id = buttons[buttons.length];
+      let inCart = cart.find(item => item.id === id);
+      if (inCart) {
+        button.innerHTML = "In Cart!";
+        button.disabled = true;
+      }
+      button.addEventListener("click", event => {
+        event.target.innerHTML = "In Cart!";
+        event.target.disabled = true;
+        // cartItems.innerHTML++;
+        //get product from products
+        let cartItem = { ...Storage.getProduct(id), amount: 1 };
+        //add product to the cart
+        cart = [...cart, cartItem];
+        // console.log(cart);
+        //save cart in local storage
+        Storage.saveCart(cart);
+      });
+    });
+  }
+}
 //local storage
-class Storage {}
+class Storage {
+  static saveProducsts(products) {
+    localStorage.setItem("products", JSON.stringify(products));
+  }
+  static getProduct(id) {
+    let products = JSON.parse(localStorage.getItem("products"));
+    return products.find(product => product.id === id);
+  }
+  static saveCart(cart) {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const ui = new UI();
@@ -43,5 +108,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   //get all products
 
-  products.getProducts().then(data => console.log(data));
+  products
+    .getProducts()
+    .then(products => {
+      ui.displayProducts(products);
+      Storage.saveProducsts(products);
+    })
+    .then(() => ui.getButtons());
 });
