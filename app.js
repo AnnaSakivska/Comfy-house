@@ -23,8 +23,7 @@ class Products {
       let products = data.items;
       products = products.map(item => {
         const { title, price } = item.fields;
-        const id = item.sys;
-        console.log(id);
+        const {id} = item.sys;
         const image = item.fields.image.fields.file.url;
         return { title, price, id, image };
       });
@@ -63,11 +62,10 @@ class UI {
   }
   getButtons() {
     let buttons = [...productsDOM.querySelectorAll(".bag-btn")];
-    console.log(buttons);
+    // console.log(buttons);
     // buttonsDOM = bottons;
     buttons.forEach(button => {
       let id = button.dataset.id;
-      // id = buttons[buttons.length];
       let inCart = cart.find(item => item.id === id);
       if (inCart) {
         button.innerHTML = "In Cart!";
@@ -81,7 +79,7 @@ class UI {
         let cartItem = { ...Storage.getProduct(id), amount: 1 };
         //add product to the cart
         cart = [...cart, cartItem];
-        // console.log(cart);
+        console.log(cart);
         //save cart in local storage
         Storage.saveCart(cart);
       });
