@@ -23,7 +23,7 @@ class Products {
       let products = data.items;
       products = products.map(item => {
         const { title, price } = item.fields;
-        const {id} = item.sys;
+        const { id } = item.sys;
         const image = item.fields.image.fields.file.url;
         return { title, price, id, image };
       });
@@ -79,11 +79,51 @@ class UI {
         let cartItem = { ...Storage.getProduct(id), amount: 1 };
         //add product to the cart
         cart = [...cart, cartItem];
-        console.log(cart);
         //save cart in local storage
         Storage.saveCart(cart);
+        //set cart values
+        this.setCartValues(cart);
+        //display cart item
+        this.addCartItem(cartItem);
+        //show the cart
+        this.showCart();
       });
     });
+  }
+  setCartValues(cart) {
+    let tempTotal = 0;
+    let itemsTotal = 0;
+    cart.map(item => {
+      tempTotal += item.price * item.amount;
+      itemsTotal += item.amount;
+    });
+    cartTotal.innerText = parseFloat(tempTotal.toFixed(2));
+    cartItems.innerText = itemsTotal;
+  }
+  addCartItem(item) {
+    const div = document.createElement("div");
+    div.classList.add("cart-item");
+    div.innerHTML = `
+    <img src="${item.image}" alt="product" />
+            <div>
+              <h4>${item.title}</h4>
+              <h5>$${item.price}</h5>
+              <span class="remove-item" data-id=${item.id}>remove</span>
+            </div>
+            <div>
+              <i class="fas fa-chevron-up" data-id=${item.id}></i>
+              <p class="item-amout">${item.amount}</p>
+              <i class="fas fa-chevron-down" data-id=${item.id}></i>
+            </div>
+    `;
+    cartContent.appendChild(div);
+  }
+  showCart() {
+    cartOverlay.classList.add("transparentBcg");
+    cartDOM.classList.add("showCart");
+  }
+  setupApp() {
+    cart = Storage.getCart(); 
   }
 }
 //local storage
@@ -98,14 +138,17 @@ class Storage {
   static saveCart(cart) {
     localStorage.setItem("cart", JSON.stringify(cart));
   }
+  static getCart() {
+    return localStorage.getItem('cart')?JSON.parse(localStarage.getItem('cart')):[];
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const ui = new UI();
   const products = new Products();
-
+  //setup app
+  ui.setupApp();
   //get all products
-
   products
     .getProducts()
     .then(products => {
