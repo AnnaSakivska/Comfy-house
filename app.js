@@ -72,11 +72,11 @@ class UI {
         button.disabled = true;
       }
       button.addEventListener("click", event => {
-        event.target.innerHTML = "In Cart!";
+        event.target.innerText = "In Cart!";
         event.target.disabled = true;
         // cartItems.innerHTML++;
         //get product from products
-        let cartItem = { ...Storage.getProduct(id), amount: 1 };
+        let cartItem = {...Storage.getProduct(id), amount: 1 };
         //add product to the cart
         cart = [...cart, cartItem];
         //save cart in local storage
@@ -122,8 +122,20 @@ class UI {
     cartOverlay.classList.add("transparentBcg");
     cartDOM.classList.add("showCart");
   }
-  setupApp() {
-    cart = Storage.getCart(); 
+  setupAPP() {
+    cart = Storage.getCart(cart);
+    // console.log(cart);
+    this.setCartValues(cart);
+    this.populateCart(cart);
+    cartBtn.addEventListener("click", this.showCart);
+    closeCartBtn.addEventListener("click", this.hideCart);
+  }
+  populateCart(cart) {
+    cart.forEach(item => this.addCartItem(item));
+  }
+  hideCart() {
+    cartOverlay.classList.remove("transparentBcg");
+    cartDOM.classList.remove("showCart");
   }
 }
 //local storage
@@ -139,7 +151,7 @@ class Storage {
     localStorage.setItem("cart", JSON.stringify(cart));
   }
   static getCart() {
-    return localStorage.getItem('cart')?JSON.parse(localStarage.getItem('cart')):[];
+    return localStorage.getItem("cart") ? JSON.parse(localStorage.getItem("cart")) : [];
   }
 }
 
@@ -147,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const ui = new UI();
   const products = new Products();
   //setup app
-  ui.setupApp();
+  ui.setupAPP();
   //get all products
   products
     .getProducts()
